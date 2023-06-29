@@ -17,11 +17,11 @@
 .OUTPUTS
 C:\ProgramData\Debloat\Debloat.log
 .NOTES
-  Version:        2.999
+  Version:        3.0
   Author:         Andrew Taylor
-  Twitter:        @AndrewTaylor_2
-  WWW:            andrewstaylor.com
+  Editor:         Jarl Kristian Gipling
   Creation Date:  08/03/2022
+  Updated Date:   29.06.2023
   Purpose/Change: Initial script development
   Change: 12/08/2022 - Added additional HP applications
   Change 23/09/2022 - Added Clipchamp (new in W11 22H2)
@@ -102,7 +102,7 @@ if ($liveversion -ne $currentversion) {
 write-host "Script has been updated, please download the latest version from $liveuri" -ForegroundColor Red
 }
 }
-Get-ScriptVersion -liveuri "https://raw.githubusercontent.com/andrew-s-taylor/public/main/De-Bloat/RemoveBloat.ps1"
+Get-ScriptVersion -liveuri "https://raw.githubusercontent.com/gipling90/Intune/main/De-Bloat/RemoveBloat.ps1"
 
 
 
@@ -728,16 +728,16 @@ else {
 ############################################################################################################
     #Windows 11 Customisations
     write-host "Removing Windows 11 Customisations"
-    #Remove XBox Game Bar
+    # #Remove XBox Game Bar
     
-    Get-AppxPackage -allusers Microsoft.XboxGamingOverlay | Remove-AppxPackage
-    write-host "Removed Xbox Gaming Overlay"
-    Get-AppxPackage -allusers Microsoft.XboxGameCallableUI | Remove-AppxPackage
-    write-host "Removed Xbox Game Callable UI"
+    # Get-AppxPackage -allusers Microsoft.XboxGamingOverlay | Remove-AppxPackage
+    # write-host "Removed Xbox Gaming Overlay"
+    # Get-AppxPackage -allusers Microsoft.XboxGameCallableUI | Remove-AppxPackage
+    # write-host "Removed Xbox Game Callable UI"
 
-    #Remove Cortana
-    Get-AppxPackage -allusers Microsoft.549981C3F5F10 | Remove-AppxPackage
-    write-host "Removed Cortana"
+    # #Remove Cortana
+    # Get-AppxPackage -allusers Microsoft.549981C3F5F10 | Remove-AppxPackage
+    # write-host "Removed Cortana"
 
     #Remove GetStarted
     Get-AppxPackage -allusers *getstarted* | Remove-AppxPackage
@@ -849,60 +849,60 @@ $blankjson | Out-File "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\La
 }
 
 
-############################################################################################################
-#                                              Remove Xbox Gaming                                          #
-#                                                                                                          #
-############################################################################################################
+# ############################################################################################################
+# #                                              Remove Xbox Gaming                                          #
+# #                                                                                                          #
+# ############################################################################################################
 
-New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\xbgm" -Name "Start" -PropertyType DWORD -Value 4 -Force
-Set-Service -Name XblAuthManager -StartupType Disabled
-Set-Service -Name XblGameSave -StartupType Disabled
-Set-Service -Name XboxGipSvc -StartupType Disabled
-Set-Service -Name XboxNetApiSvc -StartupType Disabled
-$task = Get-ScheduledTask -TaskName "Microsoft\XblGameSave\XblGameSaveTask" -ErrorAction SilentlyContinue
-if ($null -ne $task) {
-Set-ScheduledTask -TaskPath $task.TaskPath -Enabled $false
-}
+# New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\xbgm" -Name "Start" -PropertyType DWORD -Value 4 -Force
+# Set-Service -Name XblAuthManager -StartupType Disabled
+# Set-Service -Name XblGameSave -StartupType Disabled
+# Set-Service -Name XboxGipSvc -StartupType Disabled
+# Set-Service -Name XboxNetApiSvc -StartupType Disabled
+# $task = Get-ScheduledTask -TaskName "Microsoft\XblGameSave\XblGameSaveTask" -ErrorAction SilentlyContinue
+# if ($null -ne $task) {
+# Set-ScheduledTask -TaskPath $task.TaskPath -Enabled $false
+# }
 
-##Check if GamePresenceWriter.exe exists
-if (Test-Path "$env:WinDir\System32\GameBarPresenceWriter.exe") {
-    write-host "GamePresenceWriter.exe exists"
-    C:\Windows\Temp\SetACL.exe -on  "$env:WinDir\System32\GameBarPresenceWriter.exe" -ot file -actn setowner -ownr "n:$everyone"
-C:\Windows\Temp\SetACL.exe -on  "$env:WinDir\System32\GameBarPresenceWriter.exe" -ot file -actn ace -ace "n:$everyone;p:full"
+# ##Check if GamePresenceWriter.exe exists
+# if (Test-Path "$env:WinDir\System32\GameBarPresenceWriter.exe") {
+#     write-host "GamePresenceWriter.exe exists"
+#     C:\Windows\Temp\SetACL.exe -on  "$env:WinDir\System32\GameBarPresenceWriter.exe" -ot file -actn setowner -ownr "n:$everyone"
+# C:\Windows\Temp\SetACL.exe -on  "$env:WinDir\System32\GameBarPresenceWriter.exe" -ot file -actn ace -ace "n:$everyone;p:full"
 
-#Take-Ownership -Path "$env:WinDir\System32\GameBarPresenceWriter.exe"
-$NewAcl = Get-Acl -Path "$env:WinDir\System32\GameBarPresenceWriter.exe"
-# Set properties
-$identity = "$builtin\Administrators"
-$fileSystemRights = "FullControl"
-$type = "Allow"
-# Create new rule
-$fileSystemAccessRuleArgumentList = $identity, $fileSystemRights, $type
-$fileSystemAccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $fileSystemAccessRuleArgumentList
-# Apply new rule
-$NewAcl.SetAccessRule($fileSystemAccessRule)
-Set-Acl -Path "$env:WinDir\System32\GameBarPresenceWriter.exe" -AclObject $NewAcl
-Stop-Process -Name "GameBarPresenceWriter.exe" -Force
-Remove-Item "$env:WinDir\System32\GameBarPresenceWriter.exe" -Force -Confirm:$false
+# #Take-Ownership -Path "$env:WinDir\System32\GameBarPresenceWriter.exe"
+# $NewAcl = Get-Acl -Path "$env:WinDir\System32\GameBarPresenceWriter.exe"
+# # Set properties
+# $identity = "$builtin\Administrators"
+# $fileSystemRights = "FullControl"
+# $type = "Allow"
+# # Create new rule
+# $fileSystemAccessRuleArgumentList = $identity, $fileSystemRights, $type
+# $fileSystemAccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $fileSystemAccessRuleArgumentList
+# # Apply new rule
+# $NewAcl.SetAccessRule($fileSystemAccessRule)
+# Set-Acl -Path "$env:WinDir\System32\GameBarPresenceWriter.exe" -AclObject $NewAcl
+# Stop-Process -Name "GameBarPresenceWriter.exe" -Force
+# Remove-Item "$env:WinDir\System32\GameBarPresenceWriter.exe" -Force -Confirm:$false
 
-}
-else {
-    write-host "GamePresenceWriter.exe does not exist"
-}
+# }
+# else {
+#     write-host "GamePresenceWriter.exe does not exist"
+# }
 
-New-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\GameDVR" -Name "AllowgameDVR" -PropertyType DWORD -Value 0 -Force
-New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "SettingsPageVisibility" -PropertyType String -Value "hide:gaming-gamebar;gaming-gamedvr;gaming-broadcasting;gaming-gamemode;gaming-xboxnetworking" -Force
-Remove-Item C:\Windows\Temp\SetACL.exe -recurse
+# New-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\GameDVR" -Name "AllowgameDVR" -PropertyType DWORD -Value 0 -Force
+# New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "SettingsPageVisibility" -PropertyType String -Value "hide:gaming-gamebar;gaming-gamedvr;gaming-broadcasting;gaming-gamemode;gaming-xboxnetworking" -Force
+# Remove-Item C:\Windows\Temp\SetACL.exe -recurse
 
 ############################################################################################################
 #                                        Disable Edge Surf Game                                            #
 #                                                                                                          #
 ############################################################################################################
-$surf = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge"
-If (!(Test-Path $surf)) {
-    New-Item $surf
-}
-New-ItemProperty -Path $surf -Name 'AllowSurfGame' -Value 0 -PropertyType DWord
+# $surf = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge"
+# If (!(Test-Path $surf)) {
+#     New-Item $surf
+# }
+# New-ItemProperty -Path $surf -Name 'AllowSurfGame' -Value 0 -PropertyType DWord
 
 
 ############################################################################################################
@@ -1003,7 +1003,7 @@ $appname = $_.Name
 }
 
 ##Remove HP Connect Optimizer
-invoke-webrequest -uri "https://raw.githubusercontent.com/andrew-s-taylor/public/main/De-Bloat/HPConnOpt.iss" -outfile "C:\Windows\Temp\HPConnOpt.iss"
+invoke-webrequest -uri "https://raw.githubusercontent.com/gipling90/Intune/main/De-Bloat/HPConnOpt.iss" -outfile "C:\Windows\Temp\HPConnOpt.iss"
 
 &'C:\Program Files (x86)\InstallShield Installation Information\{6468C4A5-E47E-405F-B675-A70A70983EA6}\setup.exe' @('-s', '-f1C:\Windows\Temp\HPConnOpt.iss')
 
@@ -1102,152 +1102,152 @@ if ($manufacturer -ccontains "Lenovo") {
 }
 
 
-############################################################################################################
-#                                        Remove Any other installed crap                                   #
-#                                                                                                          #
-############################################################################################################
+# ############################################################################################################
+# #                                        Remove Any other installed crap                                   #
+# #                                                                                                          #
+# ############################################################################################################
 
-#McAfee
+# #McAfee
 
-write-host "Detecting McAfee"
-$mcafeeinstalled = "false"
-$InstalledSoftware = Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
-foreach($obj in $InstalledSoftware){
-     $name = $obj.GetValue('DisplayName')
-     if ($name -like "*McAfee*") {
-         $mcafeeinstalled = "true"
-     }
-}
+# write-host "Detecting McAfee"
+# $mcafeeinstalled = "false"
+# $InstalledSoftware = Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
+# foreach($obj in $InstalledSoftware){
+#      $name = $obj.GetValue('DisplayName')
+#      if ($name -like "*McAfee*") {
+#          $mcafeeinstalled = "true"
+#      }
+# }
 
-$InstalledSoftware32 = Get-ChildItem "HKLM:\Software\WOW6432NODE\Microsoft\Windows\CurrentVersion\Uninstall"
-foreach($obj32 in $InstalledSoftware32){
-     $name32 = $obj32.GetValue('DisplayName')
-     if ($name32 -like "*McAfee*") {
-         $mcafeeinstalled = "true"
-     }
-}
+# $InstalledSoftware32 = Get-ChildItem "HKLM:\Software\WOW6432NODE\Microsoft\Windows\CurrentVersion\Uninstall"
+# foreach($obj32 in $InstalledSoftware32){
+#      $name32 = $obj32.GetValue('DisplayName')
+#      if ($name32 -like "*McAfee*") {
+#          $mcafeeinstalled = "true"
+#      }
+# }
 
-if ($mcafeeinstalled -eq "true") {
-    Write-Host "McAfee detected"
-    #Remove McAfee bloat
-##McAfee
-### Download McAfee Consumer Product Removal Tool ###
-write-host "Downloading McAfee Removal Tool"
-# Download Source
-$URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mcafeeclean.zip'
+# if ($mcafeeinstalled -eq "true") {
+#     Write-Host "McAfee detected"
+#     #Remove McAfee bloat
+# ##McAfee
+# ### Download McAfee Consumer Product Removal Tool ###
+# write-host "Downloading McAfee Removal Tool"
+# # Download Source
+# $URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mcafeeclean.zip'
 
-# Set Save Directory
-$destination = 'C:\ProgramData\Debloat\mcafee.zip'
+# # Set Save Directory
+# $destination = 'C:\ProgramData\Debloat\mcafee.zip'
 
-#Download the file
-Invoke-WebRequest -Uri $URL -OutFile $destination -Method Get
+# #Download the file
+# Invoke-WebRequest -Uri $URL -OutFile $destination -Method Get
   
-Expand-Archive $destination -DestinationPath "C:\ProgramData\Debloat" -Force
+# Expand-Archive $destination -DestinationPath "C:\ProgramData\Debloat" -Force
 
-write-host "Removing McAfee"
-# Automate Removal and kill services
-start-process "C:\ProgramData\Debloat\Mccleanup.exe" -ArgumentList "-p StopServices,MFSY,PEF,MXD,CSP,Sustainability,MOCP,MFP,APPSTATS,Auth,EMproxy,FWdiver,HW,MAS,MAT,MBK,MCPR,McProxy,McSvcHost,VUL,MHN,MNA,MOBK,MPFP,MPFPCU,MPS,SHRED,MPSCU,MQC,MQCCU,MSAD,MSHR,MSK,MSKCU,MWL,NMC,RedirSvc,VS,REMEDIATION,MSC,YAP,TRUEKEY,LAM,PCB,Symlink,SafeConnect,MGS,WMIRemover,RESIDUE -v -s"
-write-host "McAfee Removal Tool has been run"
+# write-host "Removing McAfee"
+# # Automate Removal and kill services
+# start-process "C:\ProgramData\Debloat\Mccleanup.exe" -ArgumentList "-p StopServices,MFSY,PEF,MXD,CSP,Sustainability,MOCP,MFP,APPSTATS,Auth,EMproxy,FWdiver,HW,MAS,MAT,MBK,MCPR,McProxy,McSvcHost,VUL,MHN,MNA,MOBK,MPFP,MPFPCU,MPS,SHRED,MPSCU,MQC,MQCCU,MSAD,MSHR,MSK,MSKCU,MWL,NMC,RedirSvc,VS,REMEDIATION,MSC,YAP,TRUEKEY,LAM,PCB,Symlink,SafeConnect,MGS,WMIRemover,RESIDUE -v -s"
+# write-host "McAfee Removal Tool has been run"
 
-}
-
-
-##Look for anything else
-
-##Make sure Intune hasn't installed anything so we don't remove installed apps
-
-$intunepath = "HKLM:\SOFTWARE\Microsoft\IntuneManagementExtension\Win32Apps"
-$intunecomplete = @(Get-ChildItem $intunepath).count
-if ($intunecomplete -eq 0) {
+# }
 
 
-##Apps to ignore - NOTE: Chrome has an unusual uninstall so sort on it's own
-$whitelistapps = @(
-    "Microsoft Update Health Tools"
-    "Microsoft Intune Management Extension"
-    "Microsoft Edge"
-    "Microsoft Edge Update"
-    "Microsoft Edge WebView2 Runtime"
-    "Google Chrome"
-    "Microsoft Teams"
-    "Teams Machine-Wide Installer"
-)
+# ##Look for anything else
 
-$InstalledSoftware = Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
-foreach($obj in $InstalledSoftware){
-     $name = $obj.GetValue('DisplayName')
-     if (($whitelistapps -notcontains $name) -and ($null -ne $obj.GetValue('UninstallString'))) {
-        $uninstallcommand = $obj.GetValue('UninstallString')
-        write-host "Uninstalling $name"
-        if ($uninstallcommand -like "*msiexec*") {
-        $splitcommand = $uninstallcommand.Split("{")
-        $msicode = $splitcommand[1]
-        $uninstallapp = "msiexec.exe /X {$msicode /qn"
-        start-process "cmd.exe" -ArgumentList "/c $uninstallapp"
-        }
-        else {
-        $splitcommand = $uninstallcommand.Split("{")
+# ##Make sure Intune hasn't installed anything so we don't remove installed apps
+
+# $intunepath = "HKLM:\SOFTWARE\Microsoft\IntuneManagementExtension\Win32Apps"
+# $intunecomplete = @(Get-ChildItem $intunepath).count
+# if ($intunecomplete -eq 0) {
+
+
+# ##Apps to ignore - NOTE: Chrome has an unusual uninstall so sort on it's own
+# $whitelistapps = @(
+#     "Microsoft Update Health Tools"
+#     "Microsoft Intune Management Extension"
+#     "Microsoft Edge"
+#     "Microsoft Edge Update"
+#     "Microsoft Edge WebView2 Runtime"
+#     "Google Chrome"
+#     "Microsoft Teams"
+#     "Teams Machine-Wide Installer"
+# )
+
+# $InstalledSoftware = Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
+# foreach($obj in $InstalledSoftware){
+#      $name = $obj.GetValue('DisplayName')
+#      if (($whitelistapps -notcontains $name) -and ($null -ne $obj.GetValue('UninstallString'))) {
+#         $uninstallcommand = $obj.GetValue('UninstallString')
+#         write-host "Uninstalling $name"
+#         if ($uninstallcommand -like "*msiexec*") {
+#         $splitcommand = $uninstallcommand.Split("{")
+#         $msicode = $splitcommand[1]
+#         $uninstallapp = "msiexec.exe /X {$msicode /qn"
+#         start-process "cmd.exe" -ArgumentList "/c $uninstallapp"
+#         }
+#         else {
+#         $splitcommand = $uninstallcommand.Split("{")
         
-        $uninstallapp = "$uninstallcommand /S"
-        start-process "cmd.exe" -ArgumentList "/c $uninstallapp"
-        }
-     }
+#         $uninstallapp = "$uninstallcommand /S"
+#         start-process "cmd.exe" -ArgumentList "/c $uninstallapp"
+#         }
+#      }
 
-     }
+#      }
 
 
-$InstalledSoftware32 = Get-ChildItem "HKLM:\Software\WOW6432NODE\Microsoft\Windows\CurrentVersion\Uninstall"
-foreach($obj32 in $InstalledSoftware32){
-     $name32 = $obj32.GetValue('DisplayName')
-     if (($whitelistapps -notcontains $name32) -and ($null -ne $obj32.GetValue('UninstallString'))) {
-        $uninstallcommand32 = $obj.GetValue('UninstallString')
-        write-host "Uninstalling $name"
-                if ($uninstallcommand32 -like "*msiexec*") {
-        $splitcommand = $uninstallcommand32.Split("{")
-        $msicode = $splitcommand[1]
-        $uninstallapp = "msiexec.exe /X {$msicode /qn"
-        start-process "cmd.exe" -ArgumentList "/c $uninstallapp"
-        }
-        else {
-        $splitcommand = $uninstallcommand32.Split("{")
+# $InstalledSoftware32 = Get-ChildItem "HKLM:\Software\WOW6432NODE\Microsoft\Windows\CurrentVersion\Uninstall"
+# foreach($obj32 in $InstalledSoftware32){
+#      $name32 = $obj32.GetValue('DisplayName')
+#      if (($whitelistapps -notcontains $name32) -and ($null -ne $obj32.GetValue('UninstallString'))) {
+#         $uninstallcommand32 = $obj.GetValue('UninstallString')
+#         write-host "Uninstalling $name"
+#                 if ($uninstallcommand32 -like "*msiexec*") {
+#         $splitcommand = $uninstallcommand32.Split("{")
+#         $msicode = $splitcommand[1]
+#         $uninstallapp = "msiexec.exe /X {$msicode /qn"
+#         start-process "cmd.exe" -ArgumentList "/c $uninstallapp"
+#         }
+#         else {
+#         $splitcommand = $uninstallcommand32.Split("{")
         
-        $uninstallapp = "$uninstallcommand /S"
-        start-process "cmd.exe" -ArgumentList "/c $uninstallapp"
-        }
-    }
-}
+#         $uninstallapp = "$uninstallcommand /S"
+#         start-process "cmd.exe" -ArgumentList "/c $uninstallapp"
+#         }
+#     }
+# }
 
-##Remove Chrome
-$chrome32path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome"
+# ##Remove Chrome
+# $chrome32path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome"
 
-if ($null -ne $chrome32path) {
+# if ($null -ne $chrome32path) {
 
-$versions = (Get-ItemProperty -path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome').version
-ForEach ($version in $versions) {
-write-host "Found Chrome version $version"
-$directory = ${env:ProgramFiles(x86)}
-write-host "Removing Chrome"
-Start-Process "$directory\Google\Chrome\Application\$version\Installer\setup.exe" -argumentlist  "--uninstall --multi-install --chrome --system-level --force-uninstall"
-}
+# $versions = (Get-ItemProperty -path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome').version
+# ForEach ($version in $versions) {
+# write-host "Found Chrome version $version"
+# $directory = ${env:ProgramFiles(x86)}
+# write-host "Removing Chrome"
+# Start-Process "$directory\Google\Chrome\Application\$version\Installer\setup.exe" -argumentlist  "--uninstall --multi-install --chrome --system-level --force-uninstall"
+# }
 
-}
+# }
 
-$chromepath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome"
+# $chromepath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome"
 
-if ($null -ne $chromepath) {
+# if ($null -ne $chromepath) {
 
-$versions = (Get-ItemProperty -path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome').version
-ForEach ($version in $versions) {
-write-host "Found Chrome version $version"
-$directory = ${env:ProgramFiles}
-write-host "Removing Chrome"
-Start-Process "$directory\Google\Chrome\Application\$version\Installer\setup.exe" -argumentlist  "--uninstall --multi-install --chrome --system-level --force-uninstall"
-}
+# $versions = (Get-ItemProperty -path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome').version
+# ForEach ($version in $versions) {
+# write-host "Found Chrome version $version"
+# $directory = ${env:ProgramFiles}
+# write-host "Removing Chrome"
+# Start-Process "$directory\Google\Chrome\Application\$version\Installer\setup.exe" -argumentlist  "--uninstall --multi-install --chrome --system-level --force-uninstall"
+# }
 
 
-}
+# }
 
-}
+# }
 
 write-host "Completed"
 
